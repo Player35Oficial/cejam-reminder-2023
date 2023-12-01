@@ -1,31 +1,85 @@
-import { View, StyleSheet, Text, TextInput } from "react-native";
-import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
+import { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import Icons from "react-native-vector-icons/FontAwesome";
-
-function Lembrete() {
-  return (
-    <View style={styles.reminder}>
-      <Text style={styles.lembreteTexto}>Texto</Text>
-      <TouchableOpacity style={styles.lembreteButton}>
-        <Icons name="trash" size={32} />
-      </TouchableOpacity>
-    </View>
-  );
-}
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
+  const [inputText, setInputText] = useState("");
+  const [reminders, setReminders] = useState([]);
+
+  var router = useRouter();
+
+  function goToReminder() {
+    router.push("/reminder");
+  }
+
+  function updateText(text) {
+    setInputText(text);
+  }
+
+  async function addReminder() {
+    var reminders = JSON.parse(await AsyncStorage.getItem("reminders")) || [];
+
+    reminders.push({
+      content: inputText,
+      createdAt: new Date(),
+    });
+
+    await AsyncStorage.setItem("reminders", JSON.stringify(reminders));
+    setReminders(reminders);
+  }
+
+  async function loadReminders() {
+    const savedReminders =
+      (await JSON.parse(await AsyncStorage.getItem("reminders"))) || [];
+
+    setReminders(savedReminders);
+  }
+
+  function Lembrete({ item }) {
+    return (
+      <TouchableOpacity style={styles.reminder} onPress={goToReminder}>
+        <Text style={styles.lembreteTexto}>{item.content}</Text>
+        <TouchableOpacity style={styles.lembreteButton}>
+          <Icons name="trash" size={32} />
+        </TouchableOpacity>
+      </TouchableOpacity>
+    );
+  }
+
+  useEffect(() => {
+    loadReminders();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Cejam - Reminder</Text>
       <FlatList
+        inverted
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
-        data={[1, 2, 3, 4, 5, 6, 7]}
-        renderItem={Lembrete}
+        data={reminders}
+        renderItem={({ item }) => {
+          return <Lembrete item={item} />;
+        }}
+        ListEmptyComponent={<Text>Lista Vazia</Text>}
       />
       <View style={styles.bottomBar}>
-        <TextInput value="Lembrete 1" style={styles.input} />
-        <TouchableOpacity style={styles.addButton}>
+        <TextInput
+          placeholder="Digite seu Lembrete"
+          style={styles.input}
+          value={inputText}
+          onChangeText={updateText}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addReminder}>
           <Icons name="plus" size={32} color={"gray"} />
         </TouchableOpacity>
       </View>
@@ -41,6 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     textAlign: "center",
+    marginTop: 24,
   },
   bottomBar: {
     height: 100,
