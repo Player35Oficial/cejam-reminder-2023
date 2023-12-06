@@ -44,6 +44,15 @@ export default function Home() {
     setReminders(savedReminders);
   }
 
+  async function removeReminder(index) {
+    var reminders = JSON.parse(await AsyncStorage.getItem("reminders")) || [];
+
+    reminders.splice(index, 1);
+
+    await AsyncStorage.setItem("reminders", JSON.stringify(reminders));
+    setReminders(reminders);
+  }
+
   function Lembrete({ item }) {
     return (
       <TouchableOpacity style={styles.reminder} onPress={goToReminder}>
@@ -67,10 +76,10 @@ export default function Home() {
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
         data={reminders}
-        renderItem={({ item }) => {
-          return <Lembrete item={item} />;
+        renderItem={({ item, index }) => {
+          return <Lembrete item={item} index={index} />;
         }}
-        ListEmptyComponent={<Text>Lista Vazia</Text>}
+        ListEmptyComponent={<Text>Lista Vazia....</Text>}
       />
       <View style={styles.bottomBar}>
         <TextInput

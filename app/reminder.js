@@ -1,4 +1,5 @@
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,13 +8,34 @@ import {
   TextInput,
 } from "react-native";
 import SimpleLineIcon from "react-native-vector-icons/SimpleLineIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Reminder() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const [reminderContent, setReminderContent] = useState("");
 
   function back() {
     router.back();
   }
+
+  async function loadReminder() {
+    var reminders = JSON.parse(await AsyncStorage.getItem("reminders"));
+
+    console.log(params.reminderIndex);
+
+    var reminder = reminders.filter((r, i) => {
+      return i === Number(params.reminderIndex);
+    })[0];
+
+    setReminderContent(reminder.content);
+  }
+
+  useEffect(() => {
+    loadReminder();
+  }, []);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={back}>
@@ -25,10 +47,11 @@ export default function Reminder() {
         multiline={true}
         style={styles.input}
         placeholder="Digite o conteúdo do seu lembrete"
+        value={reminderContent}
       />
 
       <TouchableOpacity style={styles.saveButton}>
-        <Text>Salvar</Text>
+        <Text style={styles.saveButtonText}>Salvar</Text>
       </TouchableOpacity>
     </View>
   );
@@ -64,6 +87,6 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 24,
-    fontWeight: 700,
+    fontWeight: "700",
   },
 });
