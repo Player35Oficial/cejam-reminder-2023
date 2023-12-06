@@ -1,4 +1,3 @@
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -8,6 +7,7 @@ import {
   TextInput,
 } from "react-native";
 import SimpleLineIcon from "react-native-vector-icons/SimpleLineIcons";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Reminder() {
@@ -15,6 +15,7 @@ export default function Reminder() {
   const params = useLocalSearchParams();
 
   const [reminderContent, setReminderContent] = useState("");
+  const [reminderCreatedAt, setReminderCreatedAt] = useState(new Date());
 
   function back() {
     router.back();
@@ -30,6 +31,15 @@ export default function Reminder() {
     })[0];
 
     setReminderContent(reminder.content);
+  }
+
+  async function saveReminder() {
+    var reminders = JSON.parse(await AsyncStorage.getItem("reminders"));
+
+    reminders[params.reminderIndex].content = reminderContent;
+
+    await AsyncStorage.setItem("reminders", JSON.stringify(reminders));
+    router.back();
   }
 
   useEffect(() => {
@@ -48,9 +58,22 @@ export default function Reminder() {
         style={styles.input}
         placeholder="Digite o conteúdo do seu lembrete"
         value={reminderContent}
+        onChangeText={(text) => setReminderContent(text)}
       />
 
-      <TouchableOpacity style={styles.saveButton}>
+      <Text style={styles.createdAt}>
+        <Text>Criado em: </Text>
+        {reminderCreatedAt.getUTCDate().toString().padStart(2, "0") +
+          "/" +
+          (Number(reminderCreatedAt.getMonth().toString().padStart(2, "0")) +
+            1) +
+          "/" +
+          reminderCreatedAt.getUTCFullYear() +
+          ", " +
+          reminderCreatedAt.toLocaleTimeString()}
+      </Text>
+
+      <TouchableOpacity style={styles.saveButton} onPress={saveReminder}>
         <Text style={styles.saveButtonText}>Salvar</Text>
       </TouchableOpacity>
     </View>
@@ -88,5 +111,14 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 24,
     fontWeight: "700",
+  },
+  createdAt: {
+    width: "50%",
+    marginTop: 32,
+    backgroundColor: "#D9D9D9",
+    borderRadius: 24,
+    padding: 16,
+    fontSize: 12,
+    textAlign: "center",
   },
 });

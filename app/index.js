@@ -6,6 +6,7 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import Icons from "react-native-vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
@@ -17,8 +18,13 @@ export default function Home() {
 
   var router = useRouter();
 
-  function goToReminder() {
-    router.push("/reminder");
+  function goToReminder(index) {
+    router.push({
+      pathname: "/reminder",
+      params: {
+        reminderIndex: index,
+      },
+    });
   }
 
   function updateText(text) {
@@ -26,6 +32,11 @@ export default function Home() {
   }
 
   async function addReminder() {
+    if (!inputText) {
+      Alert.alert("Aviso", "Campo vazio... digite antes de adicionar");
+      return;
+    }
+
     var reminders = JSON.parse(await AsyncStorage.getItem("reminders")) || [];
 
     reminders.push({
@@ -53,11 +64,21 @@ export default function Home() {
     setReminders(reminders);
   }
 
-  function Lembrete({ item }) {
+  function Lembrete({ item, index }) {
     return (
-      <TouchableOpacity style={styles.reminder} onPress={goToReminder}>
+      <TouchableOpacity
+        style={styles.reminder}
+        onPress={() => {
+          goToReminder(index);
+        }}
+      >
         <Text style={styles.lembreteTexto}>{item.content}</Text>
-        <TouchableOpacity style={styles.lembreteButton}>
+        <TouchableOpacity
+          style={styles.lembreteButton}
+          onPress={() => {
+            removeReminder(index);
+          }}
+        >
           <Icons name="trash" size={32} />
         </TouchableOpacity>
       </TouchableOpacity>
