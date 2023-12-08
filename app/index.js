@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Home() {
   const [inputText, setInputText] = useState("");
   const [reminders, setReminders] = useState([]);
+  const [pesquisa, setPesquisa] = useState("");
 
   var router = useRouter();
 
@@ -47,6 +48,7 @@ export default function Home() {
 
     await AsyncStorage.setItem("reminders", JSON.stringify(reminders));
     setReminders(reminders);
+    setInputText("");
   }
 
   async function loadReminders() {
@@ -105,11 +107,28 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Cejam - Reminder</Text>
+
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Procure por um lembrete"
+        value={pesquisa}
+        onChangeText={(text) => setPesquisa(text)}
+      />
+
       <FlatList
         inverted
         style={{ flex: 1 }}
         contentContainerStyle={styles.content}
-        data={reminders}
+        data={reminders.filter((reminder) => {
+          if (
+            reminder.title
+              .toLowerCase()
+              .replace(" ", "")
+              .includes(pesquisa.toLowerCase())
+          ) {
+            return reminder;
+          }
+        })}
         renderItem={({ item, index }) => {
           return <Lembrete item={item} index={index} />;
         }}
@@ -194,5 +213,14 @@ const styles = StyleSheet.create({
   },
   lembreteTextoConteudo: {
     opacity: 0.5,
+  },
+  searchBar: {
+    height: 55,
+    backgroundColor: "#ECECEC",
+    borderRadius: 32,
+    paddingHorizontal: 24,
+    fontSize: 18,
+    marginHorizontal: 24,
+    marginVertical: 12,
   },
 });
