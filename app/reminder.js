@@ -14,6 +14,7 @@ export default function Reminder() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
+  const [reminderTitle, setReminderTitle] = useState("");
   const [reminderContent, setReminderContent] = useState("");
   const [reminderCreatedAt, setReminderCreatedAt] = useState(new Date());
 
@@ -30,12 +31,14 @@ export default function Reminder() {
       return i === Number(params.reminderIndex);
     })[0];
 
+    setReminderTitle(reminder.title);
     setReminderContent(reminder.content);
   }
 
   async function saveReminder() {
     var reminders = JSON.parse(await AsyncStorage.getItem("reminders"));
 
+    reminders[params.reminderIndex].title = reminderTitle;
     reminders[params.reminderIndex].content = reminderContent;
 
     await AsyncStorage.setItem("reminders", JSON.stringify(reminders));
@@ -51,6 +54,15 @@ export default function Reminder() {
       <TouchableOpacity onPress={back}>
         <SimpleLineIcon name="arrow-left" size={32} />
       </TouchableOpacity>
+
+      <TextInput
+        textAlignVertical="top"
+        multiline={true}
+        style={styles.title}
+        placeholder="Digite o título do seu lembrete..."
+        value={reminderTitle}
+        onChangeText={(text) => setReminderTitle(text)}
+      />
 
       <TextInput
         textAlignVertical="top"
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderRadius: 24,
     minHeight: 250,
-    marginTop: 56,
+    marginTop: 42,
   },
   saveButton: {
     width: "100%",
@@ -107,6 +119,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 24,
     marginLeft: 24,
+    // Android
+    elevation: 4,
+    // IOS
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowRadius: 24,
+    shadowOpacity: 0.5,
   },
   saveButtonText: {
     fontSize: 24,
@@ -119,6 +141,15 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 16,
     fontSize: 12,
+    textAlign: "center",
+  },
+  title: {
+    backgroundColor: "#D9D9D9",
+    borderRadius: 24,
+    padding: 24,
+    fontSize: 24,
+    marginTop: 42,
+    fontWeight: "700",
     textAlign: "center",
   },
 });

@@ -40,7 +40,8 @@ export default function Home() {
     var reminders = JSON.parse(await AsyncStorage.getItem("reminders")) || [];
 
     reminders.push({
-      content: inputText,
+      title: inputText,
+      content: "",
       createdAt: new Date(),
     });
 
@@ -72,7 +73,19 @@ export default function Home() {
           goToReminder(index);
         }}
       >
-        <Text style={styles.lembreteTexto}>{item.content}</Text>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            height: "100%",
+            overflow: "hidden",
+          }}
+        >
+          <Text style={styles.lembreteTexto}>{item.title}</Text>
+          <Text style={styles.lembreteTextoConteudo}>{item.content}</Text>
+        </View>
         <TouchableOpacity
           style={styles.lembreteButton}
           onPress={() => {
@@ -158,23 +171,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9D9D9",
     flexDirection: "row",
     height: 100,
+    maxHeight: 100,
     borderRadius: 24,
     padding: 24,
     alignItems: "center",
     justifyContent: "center",
+    gap: 12,
   },
   lembreteTexto: {
     fontSize: 24,
-    flex: 1,
+    fontWeight: "500",
   },
   lembreteButton: {
     fontSize: 32,
-    backgroundColor: "#BEBEBE",
     padding: 8,
-    borderRadius: 8,
-    width: 48,
-    height: 48,
     alignItems: "center",
+    width: 60,
+    height: 60,
+    borderRadius: 24,
     justifyContent: "center",
+    backgroundColor: "#BEBEBE",
+  },
+  lembreteTextoConteudo: {
+    opacity: 0.5,
   },
 });
